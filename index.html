@@ -3,350 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Salary Calculator - Hun Samnang</title>
+    <title>Smart OT Calculator</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;700&family=Moul&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas for Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Font: Kantumruy Pro -->
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e1e24; }
-        ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 4px; }
-
-        body {
-            font-family: 'Kantumruy Pro', sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1560233026-ad254fa82fc8?q=80&w=2670&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
-            min-height: 100vh;
+        @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+        body { font-family: 'Kantumruy Pro', sans-serif; }
+        .bg-khmer-pattern {
+            background-color: #032EA1;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230538bc' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
         }
-
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; w-full; h-full;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.85));
-            z-index: -1;
-            width: 100%; height: 100%;
-        }
-
-        /* Glassmorphism Effect */
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border-radius: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .glass-panel:hover {
-            border-color: rgba(212, 175, 55, 0.3); /* Gold border on hover */
-        }
-
-        /* Inputs */
-        .premium-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .premium-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #d4af37; /* Gold */
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-        }
-        .premium-input::placeholder { color: rgba(255, 255, 255, 0.3); }
-
-        /* Typography */
-        .font-moul { font-family: 'Moul', serif; }
-        .text-gold { color: #d4af37; }
-        .text-gold-light { color: #f3e5ab; }
-        
-        /* Custom Range Slider for Days/Hours (optional visual flair) */
-        label { font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 6px; display: block; }
     </style>
 </head>
-<body class="antialiased selection:bg-yellow-500 selection:text-black">
-    
-    <div class="bg-overlay"></div>
+<body class="bg-slate-50">
+    <div id="root"></div>
 
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        
-        <!-- HEADER -->
-        <header class="text-center mb-10 animate-fade-in-down">
-            <h1 class="text-3xl md:text-5xl font-moul text-gold mb-2 drop-shadow-lg leading-relaxed pt-4">
-                កម្មវិធីគណនាប្រាក់ខែ
-            </h1>
-            <div class="h-1 w-24 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mx-auto rounded-full mb-3"></div>
-            <p class="text-gray-300 font-light tracking-wider">រចនាដោយភាពច្បាស់លាស់ និងទំនើបកម្ម</p>
-        </header>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- LEFT COLUMN: INPUTS (Span 8) -->
-            <div class="lg:col-span-8 space-y-6">
-                
-                <!-- SECTION 1: MAIN SALARY INFO -->
-                <div class="glass-panel p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                        <div class="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-                            <i data-lucide="briefcase" class="w-6 h-6"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">ព័ត៌មានការងារ & ប្រាក់ខែ</h2>
-                    </div>
+        // --- ICONS (SVG Components) ---
+        const Icon = ({ path, size = 24, className = "", fill = "none" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: path }} />
+        );
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div class="col-span-1 md:col-span-2">
-                            <label>ប្រាក់ខែគោល (Basic Salary)</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold">$</span>
-                                <input type="number" id="basicSalary" class="premium-input pl-8 text-gold font-bold text-lg" placeholder="0.00" oninput="calc()">
-                            </div>
-                        </div>
-                        <div>
-                            <label>ថ្ងៃស្តង់ដារ/ខែ</label>
-                            <input type="number" id="stdDays" value="26" class="premium-input text-center" oninput="calc()">
-                        </div>
-                        <div>
-                            <label>ម៉ោងការងារ/ថ្ងៃ</label>
-                            <input type="number" id="hoursPerDay" value="8" class="premium-input text-center text-blue-300 font-bold" oninput="calc()">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-5 pt-5 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">តម្លៃ ១ ម៉ោង (100%)</p>
-                            <p id="rate100" class="text-lg font-bold text-white mt-1">0.00 $</p>
-                        </div>
-                        <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                            <p class="text-xs text-gold uppercase tracking-wide">តម្លៃ ១ ម៉ោង (150%)</p>
-                            <p id="rate150" class="text-lg font-bold text-gold mt-1">0.00 $</p>
-                        </div>
-                        <div class="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                            <p class="text-xs text-purple-400 uppercase tracking-wide">តម្លៃ ១ ម៉ោង (200%)</p>
-                            <p id="rate200" class="text-lg font-bold text-purple-400 mt-1">0.00 $</p>
-                        </div>
-                    </div>
-                </div>
+        const icons = {
+            Play: '<polygon points="5 3 19 12 5 21 5 3"></polygon>',
+            Utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+            Clock: '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>',
+            Zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
+            Moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>',
+            Calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
+            LayoutDashboard: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>',
+            Sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>',
+            Trash2: '<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>',
+            ClipboardPaste: '<path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10"/><path d="m17 10 4 4-4 4"/>',
+            Check: '<polyline points="20 6 9 17 4 12"></polyline>',
+            AlertTriangle: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+            Languages: '<path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path>',
+            HelpCircle: '<circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+            X: '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+            Heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
+            Facebook: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>',
+            MessageCircle: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>',
+            Send: '<line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>',
+            QrCode: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M10 21V10"></path><path d="M14 10h10"></path>',
+            Download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>',
+            ImageIcon: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>',
+            Loader2: '<path d="M21 12a9 9 0 1 1-6.219-8.56"></path>',
+            Eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle>',
+            EyeOff: '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line>'
+        };
 
-                <!-- SECTION 2: ATTENDANCE & OT -->
-                <div class="glass-panel p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                        <div class="p-2 rounded-lg bg-green-500/20 text-green-400">
-                            <i data-lucide="clock" class="w-6 h-6"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">វត្តមាន & ថែមម៉ោង (OT)</h2>
-                    </div>
+        const renderIcon = (name, props) => {
+            return <Icon path={icons[name]} {...props} />;
+        };
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                        <div>
-                            <label class="text-green-400 font-bold">ថ្ងៃមកធ្វើការជាក់ស្តែង</label>
-                            <input type="number" id="actDays" value="26" class="premium-input border-green-500/30 focus:border-green-500" oninput="calc()">
-                        </div>
-                        <div>
-                            <label>OT 150% (ម៉ោង)</label>
-                            <input type="number" id="ot150" placeholder="0" class="premium-input" oninput="calc()">
-                            <div id="totalOt150" class="text-right text-xs text-gold mt-1 h-4"></div>
-                        </div>
-                        <div>
-                            <label>OT 200% (ម៉ោង)</label>
-                            <input type="number" id="ot200" placeholder="0" class="premium-input" oninput="calc()">
-                            <div id="totalOt200" class="text-right text-xs text-purple-400 mt-1 h-4"></div>
-                        </div>
-                    </div>
+        const KhmerOtCalculator = () => {
+            const [inputText, setInputText] = useState('');
+            const [parsedData, setParsedData] = useState([]);
+            const [lang, setLang] = useState('kh'); 
+            const [showHelp, setShowHelp] = useState(false);
+            const [showDonate, setShowDonate] = useState(false);
+            const [isDownloading, setIsDownloading] = useState(false);
+            const [showMeal, setShowMeal] = useState(false);
+            const [total150, setTotal150] = useState(0);
+            const [total200, setTotal200] = useState(0);
+            const [grandTotalHours, setGrandTotalHours] = useState(0);
+            const [grandTotalMeal, setGrandTotalMeal] = useState(0);
+            const [copySuccess, setCopySuccess] = useState(false);
+            const [confirmClear, setConfirmClear] = useState(false);
+            const tableRef = useRef(null);
 
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label>ថ្លៃបាយ ($)</label>
-                            <input type="number" id="food" placeholder="0" class="premium-input" oninput="calc()">
-                        </div>
-                        <div>
-                            <label>លើកទឹកចិត្ត ($)</label>
-                            <input type="number" id="incentive" placeholder="0" class="premium-input" oninput="calc()">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: EXPENSES -->
-                <div class="glass-panel p-6 md:p-8">
-                    <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-                        <div class="p-2 rounded-lg bg-red-500/20 text-red-400">
-                            <i data-lucide="wallet" class="w-6 h-6"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-white">ការចំណាយប្រចាំខែ</h2>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div><label>សងគេ</label><input type="number" id="debt" class="premium-input" oninput="calc()"></div>
-                        <div><label>ថ្លៃសាំង</label><input type="number" id="gas" class="premium-input" oninput="calc()"></div>
-                        <div><label>ផ្ទះជួល</label><input type="number" id="rent" class="premium-input" oninput="calc()"></div>
-                        <div><label>Skin Care</label><input type="number" id="skincare" class="premium-input" oninput="calc()"></div>
-                        <div><label>Internet</label><input type="number" id="internet" class="premium-input" oninput="calc()"></div>
-                        <div><label>សម្លៀកបំពាក់</label><input type="number" id="clothing" class="premium-input" oninput="calc()"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- RIGHT COLUMN: SUMMARY (Span 4) -->
-            <div class="lg:col-span-4">
-                <div class="glass-panel p-6 sticky top-6 border-t-4 border-t-yellow-500">
-                    <h2 class="text-xl font-moul text-center text-white mb-6">លទ្ធផលសង្ខេប</h2>
-
-                    <!-- Summary Items -->
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-white/5">
-                            <span class="text-gray-300 text-sm">ប្រាក់ខែ (Pro-rated)</span>
-                            <span id="sumSalary" class="font-bold text-white">0.00 $</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-white/5">
-                            <span class="text-gold-light text-sm">ប្រាក់ OT សរុប</span>
-                            <span id="sumOT" class="font-bold text-gold">0.00 $</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-white/5">
-                            <span class="text-gray-300 text-sm">ប្រាក់ឧបត្ថម្ភ</span>
-                            <span id="sumAllowance" class="font-bold text-white">0.00 $</span>
-                        </div>
-                        
-                        <div class="bg-green-500/10 p-4 rounded-xl border border-green-500/20 mt-4">
-                            <div class="flex justify-between items-end">
-                                <span class="text-green-400 text-sm font-bold uppercase">ចំណូលសរុប</span>
-                                <span id="totalIncome" class="text-2xl font-bold text-green-400">0.00 $</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-red-500/10 p-4 rounded-xl border border-red-500/20">
-                            <div class="flex justify-between items-end">
-                                <span class="text-red-400 text-sm font-bold uppercase">ចំណាយសរុប</span>
-                                <span id="totalExpense" class="text-xl font-bold text-red-400">0.00 $</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="my-8 relative">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
-                        <div class="relative flex justify-center text-sm"><span class="px-2 bg-[#2d2d30] text-gray-500 rounded-full border border-white/10">Net Balance</span></div>
-                    </div>
-
-                    <div class="text-center">
-                        <p class="text-gray-400 text-sm mb-2">ទឹកប្រាក់នៅសល់ក្នុងដៃ</p>
-                        <div id="netBalance" class="text-4xl md:text-5xl font-bold text-gold drop-shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-300">
-                            0.00 $
-                        </div>
-                    </div>
-
-                    <button onclick="clearAll()" class="w-full mt-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center justify-center gap-2 group border border-white/10">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"></i>
-                        សម្អាតទិន្នន័យ
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- FOOTER -->
-        <footer class="mt-16 text-center border-t border-white/10 pt-8 pb-4">
-            <p class="text-white text-lg flex items-center justify-center gap-2">
-                បង្កើតឡើងដោយ 
-                <span class="font-moul text-gold text-xl drop-shadow-md">ហ៊ុន សំណាង</span>
-            </p>
-            <div class="flex justify-center gap-4 mt-4 opacity-50">
-                <i data-lucide="facebook" class="w-5 h-5 hover:text-blue-500 cursor-pointer transition"></i>
-                <i data-lucide="instagram" class="w-5 h-5 hover:text-pink-500 cursor-pointer transition"></i>
-                <i data-lucide="globe" class="w-5 h-5 hover:text-green-500 cursor-pointer transition"></i>
-            </div>
-            <p class="text-xs text-gray-500 mt-4">© 2025 Angkor Salary Calculator. All rights reserved.</p>
-        </footer>
-
-    </div>
-
-    <script>
-        lucide.createIcons();
-
-        function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
-        function setTxt(id, val) { document.getElementById(id).innerText = val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' $'; }
-
-        function calc() {
-            // Inputs
-            const salary = getVal('basicSalary');
-            const stdDays = getVal('stdDays') || 26;
-            const hoursPerDay = getVal('hoursPerDay') || 8;
-            const actDays = getVal('actDays');
-
-            // Rate Logic
-            let dailyRate = 0;
-            let hourlyRate = 0;
-            if (stdDays > 0) {
-                dailyRate = salary / stdDays;
-                if (hoursPerDay > 0) {
-                    hourlyRate = dailyRate / hoursPerDay;
+            const t = {
+                kh: {
+                    title: "កម្មវិធីគណនា OT",
+                    subtitle: "រហ័ស • ត្រឹមត្រូវ • ងាយស្រួល",
+                    calculate: "គណនាឥឡូវ",
+                    ot: "OT (150%)",
+                    night: "យប់ (200%)",
+                    totalHours: "ម៉ោងសរុប",
+                    totalMeal: "ថ្លៃបាយសរុប",
+                    subOt: "06:00 - 22:00",
+                    subNight: "22:00 - 06:00",
+                    subTotal: "ម៉ោងធ្វើការទាំងអស់",
+                    subMeal: "ប្រាក់ឧបត្ថម្ភ",
+                    inputTitle: "បញ្ចូលទិន្នន័យ",
+                    paste: "ដាក់ចូល (Paste)",
+                    clear: "សម្អាត",
+                    sure: "ច្បាស់ទេ?",
+                    placeholder: "សូមចម្លងកាលវិភាគការងារមកដាក់ទីនេះ...",
+                    example: "ឧទាហរណ៍: ចន្ទ= 08:00-17:00 ឬ 18:00-20:30 (3$)",
+                    tableTitle: "តារាងលម្អិត",
+                    colDate: "កាលបរិច្ឆេទ",
+                    colTime: "ម៉ោង",
+                    colTotal: "សរុប",
+                    colMeal: "ថ្លៃបាយ",
+                    noData: "មិនទាន់មានទិន្នន័យ",
+                    noDataSub: "សូមបញ្ចូល ឬ Paste កាលវិភាគការងារ",
+                    createdBy: "បង្កើតឡើងដោយ ហ៊ុន សំណាង",
+                    helpTitle: "របៀបប្រើប្រាស់",
+                    helpSteps: [
+                        "1. ចម្លង (Copy) អត្ថបទកាលវិភាគការងាររបស់អ្នក។",
+                        "2. ចុចប៊ូតុង 'ដាក់ចូល' ឬចុច Ctrl+V ក្នុងប្រអប់។",
+                        "3. ទម្រង់៖ 'ចន្ទ= 08:00-17:00' ឬ '18:00-20:30 (3$)'។",
+                        "4. ចុចប៊ូតុង 'គណនាឥឡូវ' ដើម្បីមើលលទ្ធផល។"
+                    ],
+                    donateTitle: "ឧបត្ថម្ភអ្នកបង្កើត",
+                    donateText: "ការគាំទ្ររបស់លោកអ្នកគឺជាកម្លាំងចិត្តដ៏ធំធេង!",
+                    contactText: "ទំនាក់ទំនង៖",
+                    close: "បិទ",
+                    download: "Save រូប",
+                    downloading: "កំពុង Save..."
+                },
+                en: {
+                    title: "Smart OT Calculator",
+                    subtitle: "Fast • Accurate • Easy",
+                    calculate: "Calculate",
+                    ot: "OT (150%)",
+                    night: "Night (200%)",
+                    totalHours: "Total Hours",
+                    totalMeal: "Total Meal",
+                    subOt: "06:00 - 22:00",
+                    subNight: "22:00 - 06:00",
+                    subTotal: "All working hours",
+                    subMeal: "Allowance",
+                    inputTitle: "Input Data",
+                    paste: "Paste",
+                    clear: "Clear",
+                    sure: "Sure?",
+                    placeholder: "Paste your schedule here...",
+                    example: "Ex: Mon= 08:00-17:00 or 18:00-20:30 (3$)",
+                    tableTitle: "Detailed Table",
+                    colDate: "Date",
+                    colTime: "Time",
+                    colTotal: "Total",
+                    colMeal: "Meal",
+                    noData: "No Data Yet",
+                    noDataSub: "Please input or paste schedule",
+                    createdBy: "Created by Hun Samnang",
+                    helpTitle: "How to Use",
+                    helpSteps: [
+                        "1. Copy your schedule text.",
+                        "2. Click 'Paste' button or Press Ctrl+V.",
+                        "3. Format: 'Mon= 08:00-17:00' or '18:00-20:30 (3$)'.",
+                        "4. Click 'Calculate' to see results."
+                    ],
+                    donateTitle: "Support Creator",
+                    donateText: "Your support keeps this tool alive!",
+                    contactText: "Contact:",
+                    close: "Close",
+                    download: "Save Image",
+                    downloading: "Saving..."
                 }
-            }
-            const rate150 = hourlyRate * 1.5;
-            const rate200 = hourlyRate * 2.0;
+            };
 
-            // Update Rate Display
-            setTxt('rate100', hourlyRate);
-            setTxt('rate150', rate150);
-            setTxt('rate200', rate200);
+            const text = t[lang];
 
-            // Earnings
-            const proratedSalary = dailyRate * actDays;
-            const ot150Earned = getVal('ot150') * rate150;
-            const ot200Earned = getVal('ot200') * rate200;
-            const allowances = getVal('food') + getVal('incentive');
+            const handleDownloadImage = () => {
+                if (parsedData.length === 0) {
+                    alert("សូមបញ្ចូលទិន្នន័យជាមុនសិន!");
+                    return;
+                }
+                setIsDownloading(true);
+                setTimeout(() => {
+                    const element = tableRef.current;
+                    if (element) {
+                        html2canvas(element, {
+                            scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true, allowTaint: true
+                        }).then(canvas => {
+                            try {
+                                const link = document.createElement('a');
+                                link.download = `OT-Report-${new Date().toISOString().slice(0,10)}.png`;
+                                link.href = canvas.toDataURL('image/png');
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            } catch (e) {
+                                alert("មានបញ្ហាក្នុងការរក្សាទុករូបភាព។");
+                            }
+                            setIsDownloading(false);
+                        }).catch(err => {
+                            alert("មិនអាចថតរូបភាពបានទេ។");
+                            setIsDownloading(false);
+                        });
+                    } else {
+                        setIsDownloading(false);
+                    }
+                }, 100);
+            };
 
-            // Small text under inputs
-            if(getVal('ot150') > 0) document.getElementById('totalOt150').innerText = '+' + ot150Earned.toFixed(2) + '$';
-            else document.getElementById('totalOt150').innerText = '';
-            
-            if(getVal('ot200') > 0) document.getElementById('totalOt200').innerText = '+' + ot200Earned.toFixed(2) + '$';
-            else document.getElementById('totalOt200').innerText = '';
+            const timeToMins = (timeStr) => {
+                const [h, m] = timeStr.split(':').map(Number);
+                return h * 60 + m;
+            };
 
-            // Totals
-            const totalIncome = proratedSalary + ot150Earned + ot200Earned + allowances;
-            const expenses = getVal('debt') + getVal('gas') + getVal('rent') + 
-                             getVal('skincare') + getVal('internet') + getVal('clothing');
-            const net = totalIncome - expenses;
+            const calculateShift = (startStr, endStr, forcePercent = null) => {
+                let startMin = timeToMins(startStr);
+                let endMin = timeToMins(endStr);
+                if (endMin < startMin) endMin += 24 * 60;
+                const totalDurationMins = endMin - startMin;
+                const totalDurationHrs = totalDurationMins / 60;
 
-            // Summary UI
-            setTxt('sumSalary', proratedSalary);
-            setTxt('sumOT', ot150Earned + ot200Earned);
-            setTxt('sumAllowance', allowances);
-            setTxt('totalIncome', totalIncome);
-            setTxt('totalExpense', expenses);
-            
-            const netEl = document.getElementById('netBalance');
-            netEl.innerText = net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' $';
+                if (forcePercent) {
+                    return {
+                        breakdown: {
+                            hrs150: forcePercent === 150 || forcePercent === 100 ? totalDurationHrs.toFixed(2) : 0,
+                            hrs200: forcePercent === 200 ? totalDurationHrs.toFixed(2) : 0,
+                            label: `Flat ${forcePercent}%`
+                        },
+                        totalHours: totalDurationHrs.toFixed(2),
+                        forcePercent: forcePercent
+                    };
+                }
 
-            if(net < 0) {
-                netEl.classList.remove('text-gold');
-                netEl.classList.add('text-red-500');
-            } else {
-                netEl.classList.remove('text-red-500');
-                netEl.classList.add('text-gold');
-            }
-        }
+                const T_06_00 = 6 * 60;
+                const T_22_00 = 22 * 60;
+                let mins150 = 0;
+                let mins200 = 0;
 
-        function clearAll() {
-            document.querySelectorAll('input').forEach(input => {
-                if(input.id === 'stdDays') input.value = 26;
-                else if(input.id === 'hoursPerDay') input.value = 8;
-                else if(input.id === 'actDays') input.value = 26;
-                else input.value = '';
-            });
-            document.getElementById('totalOt150').innerText = '';
-            document.getElementById('totalOt200').innerText = '';
-            calc();
-        }
+                for (let t = startMin; t < endMin; t++) {
+                    let currentTime = t % 1440;
+                    if (currentTime >= T_06_00 && currentTime < T_22_00) mins150++;
+                    else mins200++;
+                }
+
+                return {
+                    breakdown: {
+                        hrs150: (mins150 / 60).toFixed(2),
+                        hrs200: (mins200 / 60).toFixed(2),
+                        label: 'Standard'
+                    },
+                    totalHours: totalDurationHrs.toFixed(2),
+                    forcePercent: null
+                };
+            };
+
+            const processText = () => {
+                if (!inputText || !inputText.trim()) {
+                    setParsedData([]); setTotal150(0); setTotal200(0); setGrandTotalHours(0); setGrandTotalMeal(0); return;
+                }
+                const lines = inputText.split('\n');
+                const results = [];
+                let s150 = 0; let s200 = 0; let sTotalHours = 0; let sTotalMeal = 0;
+
+                lines.forEach((line, index) => {
+                    if (!line.trim()) return;
+                    const labelMatch = line.match(/^[^=0-9]+/); 
+                    let labelRaw = labelMatch ? labelMatch[0].trim() : '';
+                    let currentDayLabel = '';
+                    if (labelRaw && !line.trim().startsWith('=')) {
+                        currentDayLabel = labelRaw.replace(/=/g, '').trim();
+                    }
+                    const timeMatch = line.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+                    const mealMatch = line.match(/\((\d+(\.\d+)?)\$\)/) || line.match(/\(\$(\d+(\.\d+)?)\)/);
+                    const percentMatch = line.match(/\((\d+)%\)/);
+
+                    if (timeMatch) {
+                        const startTime = timeMatch[1];
+                        const endTime = timeMatch[2];
+                        const mealAllowance = mealMatch ? parseFloat(mealMatch[1]) || parseFloat(mealMatch[2]) : 0;
+                        const forcePercent = percentMatch ? parseInt(percentMatch[1]) : null;
+                        const calc = calculateShift(startTime, endTime, forcePercent);
+                        
+                        s150 += parseFloat(calc.breakdown.hrs150);
+                        s200 += parseFloat(calc.breakdown.hrs200);
+                        sTotalHours += parseFloat(calc.totalHours);
+                        sTotalMeal += mealAllowance;
+
+                        results.push({
+                            id: index,
+                            day: currentDayLabel || (results.length > 0 ? results[results.length-1].day : ''),
+                            timeRange: `${startTime} - ${endTime}`,
+                            mealAllowance: mealAllowance,
+                            ...calc
+                        });
+                    }
+                });
+                setParsedData(results); setTotal150(s150); setTotal200(s200); setGrandTotalHours(sTotalHours); setGrandTotalMeal(sTotalMeal);
+            };
+
+            useEffect(() => { processText(); }, []);
+
+            const handleClear = () => {
+                if (confirmClear) {
+                    setInputText(''); setParsedData([]); setTotal150(0); setTotal200(0); setGrandTotalHours(0); setGrandTotalMeal(0); setConfirmClear(false);
+                } else {
+                    setConfirmClear(true); setTimeout(() => setConfirmClear(false), 3000);
+                }
+            };
+
+            const handlePaste = async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    setInputText(text); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000);
+                } catch (err) {
+                    // Fallback for mobile if clipboard API fails
+                    alert("សូមចុច Ctrl+V ឬប្រើមុខងារ Paste របស់ទូរស័ព្ទ");
+                }
+            };
+
+            const toggleLang = () => { setLang(prev => prev === 'kh' ? 'en' : 'kh'); };
+
+            const StatCard = ({ title, value, sub, icon, colorClass, bgClass, isPrivate }) => (
+                <div className="relative overflow-hidden p-4 rounded-xl shadow-sm border border-blue-100 bg-white hover:shadow-md transition-all duration-300">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
+                    <div className="flex items-start justify-between relative z-10">
+                        <div>
+                            <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${colorClass}`}>{title}</p>
+                            <h3 className="text-2xl font-bold text-gray-800 font-kantumruy mt-1">
+                                {isPrivate && !showMeal ? '****' : value}
+                            </h3>
+                            <p className="text-[10px] text-gray-400 mt-1 font-medium">{sub}</p>
+                        </div>
+                        <div className={`p-2.5 rounded-full ${bgClass} ${colorClass}`}>
+                            {renderIcon(icon, { size: 20 })}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-slate-50 flex flex-col font-kantumruy">
+                    <div className="bg-khmer-pattern text-white shadow-lg sticky top-0 z-30">
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white/10 p-2.5 rounded-lg border border-white/20 backdrop-blur-sm">
+                                        {renderIcon('LayoutDashboard', { size: 24, className: "text-white" })}
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-bold font-kantumruy leading-none">{text.title}</h1>
+                                        <p className="text-[10px] text-blue-200 mt-1 font-light tracking-wide">{text.subtitle}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 self-end md:self-auto">
+                                    <button onClick={() => setShowDonate(true)} className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors shadow-md border border-red-500">{renderIcon('Heart', { size: 18, fill: "currentColor" })}</button>
+                                    <button onClick={() => setShowHelp(true)} className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-sm">{renderIcon('HelpCircle', { size: 18 })}</button>
+                                    <button onClick={toggleLang} className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold border border-white/10 backdrop-blur-sm transition-colors">{lang === 'kh' ? 'ខ្មែរ' : 'EN'}</button>
+                                    <button onClick={processText} className="bg-yellow-400 hover:bg-yellow-500 text-blue-900 px-5 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 transition-transform active:scale-95 ml-2">{renderIcon('Play', { size: 16, fill: "currentColor" })} <span>{text.calculate}</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 mt-6 flex-grow w-full pb-10">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <StatCard title={text.ot} value={`${total150.toFixed(2)}h`} sub={text.subOt} icon="Zap" colorClass="text-blue-700" bgClass="bg-blue-50" />
+                            <StatCard title={text.night} value={`${total200.toFixed(2)}h`} sub={text.subNight} icon="Moon" colorClass="text-red-600" bgClass="bg-red-50" />
+                            <StatCard title={text.totalHours} value={`${grandTotalHours.toFixed(2)}h`} sub={text.subTotal} icon="Clock" colorClass="text-emerald-600" bgClass="bg-emerald-50" />
+                            <StatCard title={text.totalMeal} value={`$${grandTotalMeal}`} sub={text.subMeal} icon="Utensils" colorClass="text-purple-600" bgClass="bg-purple-50" isPrivate={true} />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-1 flex flex-col h-[550px]">
+                                <div className="bg-white rounded-xl shadow-sm border border-blue-100 flex-1 flex flex-col overflow-hidden relative">
+                                    <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                                        <span className="font-bold text-gray-700 text-sm flex items-center gap-2">{renderIcon('ClipboardPaste', { size: 16, className: "text-blue-600" })} {text.inputTitle}</span>
+                                        <div className="flex gap-2">
+                                            <button onClick={handlePaste} className="text-xs flex items-center gap-1 text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition">{copySuccess ? renderIcon('Check', { size: 14 }) : renderIcon('ClipboardPaste', { size: 14 })} {text.paste}</button>
+                                            <button onClick={handleClear} className="text-xs flex items-center gap-1 text-red-500 hover:bg-red-50 px-2 py-1 rounded transition">{confirmClear ? renderIcon('AlertTriangle', { size: 14 }) : renderIcon('Trash2', { size: 14 })} {confirmClear ? text.sure : text.clear}</button>
+                                        </div>
+                                    </div>
+                                    <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} className="flex-1 w-full p-4 border-none resize-none focus:ring-0 outline-none text-sm leading-relaxed text-gray-700 placeholder-gray-400 font-kantumruy" placeholder={text.placeholder} />
+                                </div>
+                                <p className="text-center text-[11px] text-gray-400 mt-2 font-mono bg-white py-1 px-2 rounded-full inline-block mx-auto shadow-sm border border-gray-100">{text.example}</p>
+                            </div>
+
+                            <div className="lg:col-span-2 h-[550px] bg-white rounded-xl shadow-sm border border-blue-100 flex flex-col overflow-hidden" ref={tableRef}>
+                                <div className="p-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                    <h3 className="font-bold text-gray-700 flex items-center gap-2 text-sm">{renderIcon('Calendar', { size: 16, className: "text-blue-600" })} {text.tableTitle}</h3>
+                                    <button onClick={handleDownloadImage} disabled={isDownloading} className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold shadow-sm transition-all disabled:opacity-50">{isDownloading ? renderIcon('Loader2', { size: 12, className: "animate-spin" }) : renderIcon('ImageIcon', { size: 12 })} {isDownloading ? text.downloading : text.download}</button>
+                                </div>
+                                <div className="flex-1 overflow-auto bg-white">
+                                    <div className="p-1">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead className="bg-blue-50/50 sticky top-0 z-10">
+                                                <tr>
+                                                    <th className="py-3 px-3 text-xs font-bold text-gray-600 border-b border-blue-100">{text.colDate}</th>
+                                                    <th className="py-3 px-3 text-xs font-bold text-gray-600 border-b border-blue-100">{text.colTime}</th>
+                                                    <th className="py-3 px-2 text-xs font-bold text-center text-blue-700 border-b border-blue-100 w-20">150%</th>
+                                                    <th className="py-3 px-2 text-xs font-bold text-center text-red-600 border-b border-blue-100 w-20">200%</th>
+                                                    <th className="py-3 px-3 text-xs font-bold text-center text-gray-700 border-b border-blue-100 w-16">{text.colTotal}</th>
+                                                    <th className="py-3 px-3 text-xs font-bold text-right text-purple-700 border-b border-blue-100 w-24">
+                                                        <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={() => setShowMeal(!showMeal)}>{text.colMeal} {showMeal ? renderIcon('EyeOff', { size: 12 }) : renderIcon('Eye', { size: 12 })}</div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50 font-kantumruy">
+                                                {parsedData.map((row, idx) => (
+                                                    <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
+                                                        <td className="p-3 align-top text-xs font-medium text-gray-800">{row.day}</td>
+                                                        <td className="p-3 align-top"><span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-mono">{row.timeRange}</span></td>
+                                                        {row.breakdown.label === 'Standard' ? (
+                                                            <>
+                                                                <td className="p-3 text-center text-xs font-bold text-blue-600">{parseFloat(row.breakdown.hrs150) > 0 ? row.breakdown.hrs150 : '-'}</td>
+                                                                <td className="p-3 text-center text-xs font-bold text-red-500">{parseFloat(row.breakdown.hrs200) > 0 ? row.breakdown.hrs200 : '-'}</td>
+                                                            </>
+                                                        ) : (
+                                                            <td colSpan="2" className="p-3 text-center text-xs font-bold text-red-500 bg-red-50/50">{row.breakdown.label}</td>
+                                                        )}
+                                                        <td className="p-3 text-center text-xs font-bold text-gray-800">{row.totalHours}h</td>
+                                                        <td className="p-3 text-right text-xs font-bold text-purple-700">{row.mealAllowance > 0 ? <span>{showMeal ? `$${row.mealAllowance}` : '****'}</span> : <span className="text-gray-300">-</span>}</td>
+                                                    </tr>
+                                                ))}
+                                                {parsedData.length === 0 && (
+                                                    <tr><td colSpan={6} className="p-16 text-center text-gray-300"><div className="flex flex-col items-center gap-2">{renderIcon('LayoutDashboard', { size: 28, className: "text-gray-200" })}<span className="text-xs">{text.noData}</span></div></td></tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                        <div className="py-2 text-center text-[9px] text-gray-300 bg-white border-t border-dashed border-gray-100 mt-2"><span className="flex items-center justify-center gap-1">{renderIcon('Sparkles', { size: 8 })} {text.title} - {text.createdBy}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="py-6 text-center text-gray-400 text-[10px] border-t border-gray-100 bg-white"><p>{text.createdBy} © {new Date().getFullYear()}</p></div>
+
+                    {showHelp && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-900/30 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
+                                    <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">{renderIcon('HelpCircle', { size: 18, className: "text-blue-600" })} {text.helpTitle}</h3>
+                                    <button onClick={() => setShowHelp(false)}>{renderIcon('X', { size: 18, className: "text-gray-400 hover:text-gray-600" })}</button>
+                                </div>
+                                <div className="p-5 text-sm text-gray-600 space-y-3 font-kantumruy">{text.helpSteps.map((step, i) => (<div key={i} className="flex gap-2"><span className="text-blue-500 font-bold">•</span><p>{step}</p></div>))}</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showDonate && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-900/30 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-xs overflow-hidden">
+                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-red-50">
+                                    <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">{renderIcon('Heart', { size: 18, className: "text-red-500", fill: "currentColor" })} {text.donateTitle}</h3>
+                                    <button onClick={() => setShowDonate(false)}>{renderIcon('X', { size: 18, className: "text-gray-400 hover:text-gray-600" })}</button>
+                                </div>
+                                <div className="p-6 text-center">
+                                    <div className="w-40 h-40 bg-white border border-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4 p-2 shadow-sm"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="Donate QR" className="w-full h-full object-contain"/></div>
+                                    <p className="text-xs text-gray-600 mb-4">{text.donateText}</p>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <a href="https://t.me/hunsamnang" target="_blank" className="flex flex-col items-center gap-1 p-2 bg-blue-50 rounded hover:bg-blue-100 transition">{renderIcon('Send', { size: 16, className: "text-blue-500" })} <span className="text-[10px] font-bold text-blue-700">Telegram</span></a>
+                                        <a href="https://wa.me/qr/H35HQISESRRLB1" target="_blank" className="flex flex-col items-center gap-1 p-2 bg-green-50 rounded hover:bg-green-100 transition">{renderIcon('MessageCircle', { size: 16, className: "text-green-500" })} <span className="text-[10px] font-bold text-green-700">WhatsApp</span></a>
+                                        <a href="https://www.facebook.com/share/1DnsafSPaJ/?mibextid=wwXIfr" target="_blank" className="flex flex-col items-center gap-1 p-2 bg-indigo-50 rounded hover:bg-indigo-100 transition">{renderIcon('Facebook', { size: 16, className: "text-indigo-600" })} <span className="text-[10px] font-bold text-indigo-800">Facebook</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<KhmerOtCalculator />);
     </script>
 </body>
-
 </html>
+
